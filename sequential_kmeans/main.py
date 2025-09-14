@@ -32,6 +32,5 @@ print(f"Execução com K-Means++ finalizada. Inércia (WCSS): {kmeans_pp.inertia
 print("Plotando o resultado do K-Means++...")
 kmeans_pp.plot()
 
-print("\n>>> INICIANDO TESTE 3: Método do Cotovelo para encontrar o K ótimo")
+print("\n>>> INICIANDO TESTE 3: Método elbow para encontrar o K ótimo")
 run_elbow_method(X, max_k=10, max_iters=50, init='kmeans++')
-print("O gráfico do cotovelo foi exibido. O 'cotovelo' deve estar em K=4.")
