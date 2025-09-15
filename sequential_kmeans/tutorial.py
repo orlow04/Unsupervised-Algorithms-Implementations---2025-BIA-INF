@@ -22,7 +22,7 @@ t_sequential = time.time() - t0
 mbk = MiniBatchKMeans(
     init="k-means++",
     n_clusters=n_clusters,
-    batch_size=batch_size,
+    batch_size=1,
     n_init=10,
     max_no_improvement=10,
     verbose=0,
@@ -68,14 +68,5 @@ ax.set_title("SKlearn MiniBatchKMeans")
 ax.set_xticks(())
 ax.set_yticks(())
 plt.text(-3.5, 1.8, f"Tempo: {t_mini_batch:.2f}s\nInércia: {mbk.inertia_:.0f}")
-
-ax = fig.add_subplot(1, 3, 3)
-different = (seq_kmeans_labels != mbk_labels)
-identical = ~different
-ax.plot(X[identical, 0], X[identical, 1], "w", markerfacecolor="#bbbbbb", marker=".")
-ax.plot(X[different, 0], X[different, 1], "w", markerfacecolor="m", marker=".")
-ax.set_title("Diferença (Nosso vs Sklearn)")
-ax.set_xticks(())
-ax.set_yticks(())
 
 plt.show()
