@@ -21,8 +21,8 @@ A custom implementation of the K-Means clustering algorithm using NumPy, with co
 from kmeans import KMeansClustering
 
 # Create and fit the model
-kmeans = KMeansClustering(k=3)
-labels = kmeans.fit(X)
+kmeans = KMeansClustering(K=3, max_iters=100)
+labels = kmeans.predict(X)
 ```
 
 ## Requirements
@@ -30,3 +30,8 @@ labels = kmeans.fit(X)
 - numpy
 - matplotlib
 - scikit-learn (for comparison and data generation)
+
+## References
+- Deep Learning Foundations and Practice(https://www.bishopbook.com/)
+- https://www.youtube.com/watch?v=6UF5Ysk_2gk
+- https://www.youtube.com/watch?v=5w5iUbTlpMQ&t=12s 
