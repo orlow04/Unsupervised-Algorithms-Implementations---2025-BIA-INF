@@ -12,15 +12,15 @@ import time
 
 from sklearn.cluster import KMeans
 
-k_means = KMeans(init="random", n_clusters=3, n_init=10)
+k_means = KMeans(init="k-means++", n_clusters=3, n_init=10)
 t0 = time.time()
 k_means.fit(X)
 t_batch = time.time() - t0
 
 
-from main import KMeansClustering
+from kmeans import KMeansClustering
 
-kmeans = KMeansClustering(K=n_clusters, max_iters=300, plot_steps=True)
+kmeans = KMeansClustering(K=n_clusters, max_iters=300, plot_steps=True, init='random')
 t0 = time.time()
 y_pred = kmeans.predict(X)
 t_custom = time.time() - t0
@@ -100,7 +100,7 @@ for k, col in zip(range(n_clusters), colors):
 ax.set_title("KMeansClustering - Numpy")
 ax.set_xticks(())
 ax.set_yticks(())
-plt.text(-3.5, 1.8, "train time: %.2fs" % (t_custom,))
+plt.text(-3.5, 1.8, "train time: %.2fs\ninertia: %f" % (t_batch, kmeans.inertia_))
 
 # MiniBatchKMeans
 ax = fig.add_subplot(1, 4, 3)
@@ -119,7 +119,7 @@ for k, col in zip(range(n_clusters), colors):
 ax.set_title("MiniBatchKMeans")
 ax.set_xticks(())
 ax.set_yticks(())
-plt.text(-3.5, 1.8, "train time: %.2fs" % (t_mini_batch,))
+plt.text(-3.5, 1.8, "train time: %.2fs\ninertia: %f" % (t_mini_batch, mbk.inertia_))
 
 # Difference plot (between kmeans and sklearn)
 ax = fig.add_subplot(1, 4, 4)
@@ -132,3 +132,5 @@ ax.set_xticks(())
 ax.set_yticks(())
 
 plt.show()
+# save all the figures
+fig.savefig("kmeans_comparison.png", dpi=300)

@@ -7,15 +7,38 @@ def euclidean_distance(x1, x2):
 
 class KMeansClustering:
     ''' K-Means Clustering Algorithm implemented with NumPy '''
-    def __init__(self, K=3, plot_steps=False, max_iters=300):
+    def __init__(self, K=3, plot_steps=False, max_iters=300, init='random'):
         self.K = K
         self.centroids = None
         self.plot_steps = plot_steps
         self.max_iters = max_iters
-
+        self.inertia_ = None
+        self.init = init  # 'random' or 'kmeans++'
         self.clusters = [[] for _ in range(self.K)] # List of K lists to hold the data points assigned to each cluster
 
         self.centroids = [] # List to hold the centroid positions
+    
+    def _init_kmeans_plus_plus(self, X):
+        """K-Means++ smart initialization"""
+        n_samples, _ = X.shape
+        centroids = np.zeros((self.K, X.shape[1]))
+        
+        # 1. Choose the first centroid randomly
+        first_idx = np.random.randint(n_samples)
+        centroids[0] = X[first_idx]
+        
+        # 2. Choose the remaining centroids
+        for k in range(1, self.K):
+            dist_sq = np.array([min([euclidean_distance(c, x)**2 for c in centroids[:k]]) for x in X])
+            probs = dist_sq / dist_sq.sum()
+            cumulative_probs = probs.cumsum()
+            r = np.random.rand()
+            
+            for j, p in enumerate(cumulative_probs):
+                if r < p:
+                    centroids[k] = X[j]
+                    break
+        return list(centroids)
 
     def predict(self, X):
         # Predict the closest cluster each data point in X belongs to
@@ -23,8 +46,11 @@ class KMeansClustering:
         self.n_samples, self.n_features = X.shape 
 
         # Initialization
-        random_sample_idxs = np.random.choice(self.n_samples, self.K, replace=False)
-        self.centroids = [self.X[idx] for idx in random_sample_idxs] # Randomly select K data points as initial centroids
+        if self.init == 'kmeans++':
+            self.centroids = self._init_kmeans_plus_plus(X)
+        else:
+            random_sample_idxs = np.random.choice(self.n_samples, self.K, replace=False)
+            self.centroids = [self.X[idx] for idx in random_sample_idxs] # Randomly select K data points as initial centroids
 
         # EM algorithm
         # Expectation step
@@ -45,8 +71,20 @@ class KMeansClustering:
             
             if self.plot_steps:
                 self.plot()
+
+        self.inertia_ = self._compute_inertia(self.clusters, self.centroids)
         
         return self._get_cluster_labels(self.clusters)
+    
+
+
+    def _compute_inertia(self, clusters, centroids):
+        # Compute the inertia (sum of squared distances to closest centroid)
+        inertia = 0
+        for cluster_idx, cluster in enumerate(clusters):
+            for data_point in cluster:
+                inertia += euclidean_distance(self.X[data_point], centroids[cluster_idx]) ** 2
+        return inertia
 
     def _create_clusters(self, centroids):
         # Assign the data points to the closest centroids to create clusters

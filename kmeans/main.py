@@ -12,4 +12,5 @@ X, labels_true = make_blobs(n_samples=3000, centers=centers, cluster_std=0.7) # 
 
 kmeans = KMeansClustering(K=clusters, max_iters=200, plot_steps=True)
 y_pred = kmeans.predict(X)
+print("Inertia:", kmeans.inertia_)
 
