@@ -18,9 +18,9 @@ k_means.fit(X)
 t_batch = time.time() - t0
 
 
-from kmeans import KMeansClustering
+from kmeans import KMeansClustering, rand_index, adjusted_rand_index
 
-kmeans = KMeansClustering(K=n_clusters, max_iters=300, plot_steps=True, init='random')
+kmeans = KMeansClustering(K=n_clusters, max_iters=300, plot_steps=False, init='random')
 t0 = time.time()
 y_pred = kmeans.predict(X)
 t_custom = time.time() - t0
@@ -60,6 +60,27 @@ k_means_labels = pairwise_distances_argmin(X, k_means_cluster_centres)
 kmeans_labels = pairwise_distances_argmin(X, kmeans_centroids)
 mbk_labels = pairwise_distances_argmin(X, mbk_centroids)
 
+# Calculate Rand Index and Adjusted Rand Index for all algorithms
+sklearn_ri = rand_index(labels_true, k_means_labels)
+sklearn_ari = adjusted_rand_index(labels_true, k_means_labels)
+
+custom_ri = rand_index(labels_true, kmeans_labels)
+custom_ari = adjusted_rand_index(labels_true, kmeans_labels)
+
+minibatch_ri = rand_index(labels_true, mbk_labels)
+minibatch_ari = adjusted_rand_index(labels_true, mbk_labels)
+
+# Print comparison results
+print("\n" + "="*60)
+print("RAND INDEX COMPARISON")
+print("="*60)
+print(f"{'Algorithm':<25} {'Time (s)':<10} {'Inertia':<12} {'Rand Index':<12} {'Adj. Rand Index':<15}")
+print("-"*75)
+print(f"{'Scikit-learn KMeans':<25} {t_batch:<10.3f} {k_means.inertia_:<12.2f} {sklearn_ri:<12.4f} {sklearn_ari:<15.4f}")
+print(f"{'Custom KMeans':<25} {t_custom:<10.3f} {kmeans.inertia_:<12.2f} {custom_ri:<12.4f} {custom_ari:<15.4f}")
+print(f"{'MiniBatch KMeans':<25} {t_mini_batch:<10.3f} {mbk.inertia_:<12.2f} {minibatch_ri:<12.4f} {minibatch_ari:<15.4f}")
+print("="*60)
+
 fig = plt.figure(figsize=(12, 3))
 fig.subplots_adjust(left=0.02, right=0.98, bottom=0.05, top=0.9)
 colors = ["#4EACC5", "#FF9C34", "#4E9A06"]
@@ -81,7 +102,7 @@ for k, col in zip(range(n_clusters), colors):
 ax.set_title("KMeans")
 ax.set_xticks(())
 ax.set_yticks(())
-plt.text(-3.5, 1.8, "train time: %.2fs\ninertia: %f" % (t_batch, k_means.inertia_))
+plt.text(-3.5, 1.8, "train time: %.2fs\ninertia: %.2f\nRI: %.3f\nARI: %.3f" % (t_batch, k_means.inertia_, sklearn_ri, sklearn_ari))
 
 # KMeansClustering custom
 ax = fig.add_subplot(1, 4, 2)
@@ -100,7 +121,7 @@ for k, col in zip(range(n_clusters), colors):
 ax.set_title("KMeansClustering - Numpy")
 ax.set_xticks(())
 ax.set_yticks(())
-plt.text(-3.5, 1.8, "train time: %.2fs\ninertia: %f" % (t_batch, kmeans.inertia_))
+plt.text(-3.5, 1.8, "train time: %.2fs\ninertia: %.2f\nRI: %.3f\nARI: %.3f" % (t_custom, kmeans.inertia_, custom_ri, custom_ari))
 
 # MiniBatchKMeans
 ax = fig.add_subplot(1, 4, 3)
@@ -119,7 +140,7 @@ for k, col in zip(range(n_clusters), colors):
 ax.set_title("MiniBatchKMeans")
 ax.set_xticks(())
 ax.set_yticks(())
-plt.text(-3.5, 1.8, "train time: %.2fs\ninertia: %f" % (t_mini_batch, mbk.inertia_))
+plt.text(-3.5, 1.8, "train time: %.2fs\ninertia: %.2f\nRI: %.3f\nARI: %.3f" % (t_mini_batch, mbk.inertia_, minibatch_ri, minibatch_ari))
 
 # Difference plot (between kmeans and sklearn)
 ax = fig.add_subplot(1, 4, 4)
@@ -133,4 +154,4 @@ ax.set_yticks(())
 
 plt.show()
 # save all the figures
-fig.savefig("kmeans_comparison.png", dpi=300)
+fig.savefig("kmeans_comparison_with_rand_index.png", dpi=300)

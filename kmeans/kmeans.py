@@ -1,9 +1,94 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from itertools import combinations
+from math import comb
 
 
 def euclidean_distance(x1, x2):
     return np.sqrt(np.sum((x1-x2)**2))
+
+
+def rand_index(labels_true, labels_pred):
+    """
+    Compute the Rand Index between two clusterings.
+    
+    Parameters:
+    -----------
+    labels_true : array-like, shape = [n_samples]
+        Ground truth class labels
+    labels_pred : array-like, shape = [n_samples]
+        Cluster labels to evaluate
+        
+    Returns:
+    --------
+    float : Rand Index value between 0 and 1
+    """
+    n = len(labels_true)
+    
+    # Count pairs
+    a = 0  # pairs in same cluster in both labelings
+    b = 0  # pairs in different clusters in both labelings
+    
+    for i in range(n):
+        for j in range(i + 1, n):
+            same_true = labels_true[i] == labels_true[j]
+            same_pred = labels_pred[i] == labels_pred[j]
+            
+            if same_true and same_pred:
+                a += 1
+            elif not same_true and not same_pred:
+                b += 1
+    
+    total_pairs = comb(n, 2)
+    return (a + b) / total_pairs
+
+
+def adjusted_rand_index(labels_true, labels_pred):
+    """
+    Compute the Adjusted Rand Index between two clusterings.
+    
+    Parameters:
+    -----------
+    labels_true : array-like, shape = [n_samples]
+        Ground truth class labels
+    labels_pred : array-like, shape = [n_samples]
+        Cluster labels to evaluate
+        
+    Returns:
+    --------
+    float : Adjusted Rand Index value, bounded above by 1.0
+    """
+    labels_true = np.array(labels_true)
+    labels_pred = np.array(labels_pred)
+    
+    # Get unique labels
+    true_labels = np.unique(labels_true)
+    pred_labels = np.unique(labels_pred)
+    
+    # Create contingency table
+    contingency_table = np.zeros((len(true_labels), len(pred_labels)), dtype=int)
+    
+    for i, true_label in enumerate(true_labels):
+        for j, pred_label in enumerate(pred_labels):
+            contingency_table[i, j] = np.sum((labels_true == true_label) & (labels_pred == pred_label))
+    
+    # Marginals
+    sum_comb_c = sum(comb(int(n_ij), 2) for n_ij in contingency_table.flat if n_ij >= 2)
+    sum_comb_k = sum(comb(int(np.sum(contingency_table[i, :])), 2) 
+                     for i in range(len(true_labels)) 
+                     if np.sum(contingency_table[i, :]) >= 2)
+    sum_comb_c_pred = sum(comb(int(np.sum(contingency_table[:, j])), 2) 
+                         for j in range(len(pred_labels)) 
+                         if np.sum(contingency_table[:, j]) >= 2)
+    
+    n = len(labels_true)
+    expected_index = sum_comb_k * sum_comb_c_pred / comb(n, 2) if n >= 2 else 0
+    max_index = (sum_comb_k + sum_comb_c_pred) / 2
+    
+    if max_index - expected_index == 0:
+        return 0.0
+    
+    return (sum_comb_c - expected_index) / (max_index - expected_index)
 
 class KMeansClustering:
     ''' K-Means Clustering Algorithm implemented with NumPy '''
@@ -14,7 +99,7 @@ class KMeansClustering:
         self.max_iters = max_iters
         self.inertia_ = None
         self.init = init  # 'random' or 'kmeans++'
-        self.clusters = [[] for _ in range(self.K)] # List of K lists to hold the data points assigned to each cluster
+        self.clusters = [[] for _ in range(self.K)] # List of K lists to hold the data points assigned to each cluster 
 
         self.centroids = [] # List to hold the centroid positions
     
@@ -133,6 +218,34 @@ class KMeansClustering:
             for point in self.centroids:
                 ax.scatter(*point, marker="x", color="black", linewidth=2)
         plt.show()
+        
+    def evaluate(self, labels_true, labels_pred=None):
+        """
+        Evaluate clustering performance using Rand Index and Adjusted Rand Index.
+        
+        Parameters:
+        -----------
+        labels_true : array-like, shape = [n_samples]
+            Ground truth class labels
+        labels_pred : array-like, shape = [n_samples], optional
+            Predicted cluster labels. If None, uses the last clustering result.
+            
+        Returns:
+        --------
+        dict : Dictionary containing 'rand_index' and 'adjusted_rand_index'
+        """
+        if labels_pred is None:
+            if not hasattr(self, 'clusters') or not self.clusters:
+                raise ValueError("No clustering results available. Run predict() first or provide labels_pred.")
+            labels_pred = self._get_cluster_labels(self.clusters)
+        
+        ri = rand_index(labels_true, labels_pred)
+        ari = adjusted_rand_index(labels_true, labels_pred)
+        
+        return {
+            'rand_index': ri,
+            'adjusted_rand_index': ari
+        }
     # def fit(self, X, max_iters=200):
     #     # Randomly initialize centroids, bounded by data range (uniformly distributed)
     #     self.centroids = np.random.uniform(np.amin(X, axis=0), np.amax(X, axis=0), 
