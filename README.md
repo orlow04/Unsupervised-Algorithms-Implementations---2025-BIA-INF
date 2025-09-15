@@ -36,3 +36,4 @@ labels = kmeans.predict(X)
 - https://www.youtube.com/watch?v=6UF5Ysk_2gk
 - https://www.youtube.com/watch?v=5w5iUbTlpMQ&t=12s
 - Probabilistic Machine Learning An Introduction (Kevin Murphy)
+- Hubert, L., & Arabie, P. (1985). Comparing partitions. Journal of classification, 2(1), 193-218.
