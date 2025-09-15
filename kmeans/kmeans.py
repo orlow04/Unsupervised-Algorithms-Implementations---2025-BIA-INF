@@ -102,28 +102,6 @@ class KMeansClustering:
         self.clusters = [[] for _ in range(self.K)] # List of K lists to hold the data points assigned to each cluster 
 
         self.centroids = [] # List to hold the centroid positions
-    
-    def _init_kmeans_plus_plus(self, X):
-        """K-Means++ smart initialization"""
-        n_samples, _ = X.shape
-        centroids = np.zeros((self.K, X.shape[1]))
-        
-        # 1. Choose the first centroid randomly
-        first_idx = np.random.randint(n_samples)
-        centroids[0] = X[first_idx]
-        
-        # 2. Choose the remaining centroids
-        for k in range(1, self.K):
-            dist_sq = np.array([min([euclidean_distance(c, x)**2 for c in centroids[:k]]) for x in X])
-            probs = dist_sq / dist_sq.sum()
-            cumulative_probs = probs.cumsum()
-            r = np.random.rand()
-            
-            for j, p in enumerate(cumulative_probs):
-                if r < p:
-                    centroids[k] = X[j]
-                    break
-        return list(centroids)
 
     def predict(self, X):
         # Predict the closest cluster each data point in X belongs to
@@ -161,6 +139,27 @@ class KMeansClustering:
         
         return self._get_cluster_labels(self.clusters)
     
+    def _init_kmeans_plus_plus(self, X):
+        """K-Means++ smart initialization"""
+        n_samples, _ = X.shape
+        centroids = np.zeros((self.K, X.shape[1]))
+            
+        # 1. Choose the first centroid randomly
+        first_idx = np.random.randint(n_samples)
+        centroids[0] = X[first_idx]
+            
+        # 2. Choose the remaining centroids
+        for k in range(1, self.K):
+            dist_sq = np.array([min([euclidean_distance(c, x)**2 for c in centroids[:k]]) for x in X])
+            probs = dist_sq / dist_sq.sum()
+            cumulative_probs = probs.cumsum()
+            r = np.random.rand()
+                
+            for j, p in enumerate(cumulative_probs):
+                if r < p:
+                    centroids[k] = X[j]
+                    break
+        return list(centroids)
 
 
     def _compute_inertia(self, clusters, centroids):

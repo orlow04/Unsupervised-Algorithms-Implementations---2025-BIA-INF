@@ -153,5 +153,5 @@ ax.set_xticks(())
 ax.set_yticks(())
 
 plt.show()
-# save all the figures
+
 fig.savefig("kmeans_comparison_with_rand_index.png", dpi=300)
