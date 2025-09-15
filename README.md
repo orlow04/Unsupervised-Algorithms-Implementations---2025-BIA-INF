@@ -34,4 +34,5 @@ labels = kmeans.predict(X)
 ## References
 - Deep Learning Foundations and Practice(https://www.bishopbook.com/)
 - https://www.youtube.com/watch?v=6UF5Ysk_2gk
-- https://www.youtube.com/watch?v=5w5iUbTlpMQ&t=12s 
+- https://www.youtube.com/watch?v=5w5iUbTlpMQ&t=12s
+- Probabilistic Machine Learning An Introduction (Kevin Murphy)
