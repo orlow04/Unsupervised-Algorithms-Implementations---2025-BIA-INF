@@ -7,21 +7,17 @@ from math import comb
 def euclidean_distance(x1, x2):
     return np.sqrt(np.sum((x1-x2)**2))
 
-
 def rand_index(labels_true, labels_pred):
     """
-    Compute the Rand Index between two clusterings.
-    
-    Parameters:
-    -----------
-    labels_true : array-like, shape = [n_samples]
-        Ground truth class labels
-    labels_pred : array-like, shape = [n_samples]
-        Cluster labels to evaluate
-        
-    Returns:
-    --------
-    float : Rand Index value between 0 and 1
+    Let U = {u1, . . . , uR} and V = {v1, . . . , vC } be two different partitions of the N data points. For
+    example, U might be the estimated clustering and V is reference clustering derived from the class
+    labels. Now define a 2x2 contingency table, containing the following numbers: T P is the number of
+    pairs that are in the same cluster in both U and V (true positives); T N is the number of pairs that
+    are in the different clusters in both U and V (true negatives); F N is the number of pairs that are in
+    the different clusters in U but the same cluster in V (false negatives); and F P is the number of pairs
+    that are in the same cluster in U but different clusters in V (false positives). A common summary
+    statistic is the Rand index:
+        RI = (T P + T N) / (T P + F P + F N + T N) - This can be interpreted as the fraction of clustering decisions that are correct.
     """
     n = len(labels_true)
     
@@ -41,7 +37,6 @@ def rand_index(labels_true, labels_pred):
     
     total_pairs = comb(n, 2)
     return (a + b) / total_pairs
-
 
 def adjusted_rand_index(labels_true, labels_pred):
     """
@@ -116,7 +111,7 @@ class KMeansClustering:
             self.centroids = [self.X[idx] for idx in random_sample_idxs] # Randomly select K data points as initial centroids
 
         # EM algorithm
-        # Expectation step
+        # Expectation step - compute clusters
         for _ in range(self.max_iters):
             # Assign samples to closest centroids 
             self.clusters = self._create_clusters(self.centroids)
@@ -144,11 +139,11 @@ class KMeansClustering:
         n_samples, _ = X.shape
         centroids = np.zeros((self.K, X.shape[1]))
             
-        # 1. Choose the first centroid randomly
+        # Choose the first centroid randomly
         first_idx = np.random.randint(n_samples)
         centroids[0] = X[first_idx]
-            
-        # 2. Choose the remaining centroids
+
+        # Choose the remaining centroids
         for k in range(1, self.K):
             dist_sq = np.array([min([euclidean_distance(c, x)**2 for c in centroids[:k]]) for x in X])
             probs = dist_sq / dist_sq.sum()

@@ -43,11 +43,10 @@ from sklearn.metrics.pairwise import pairwise_distances_argmin
 k_means_cluster_centres =  k_means.cluster_centers_
 k_means_labels = pairwise_distances_argmin(X, k_means_cluster_centres)
 
-# --- Robust comparison and visualization for all three algorithms ---
 from sklearn.metrics.pairwise import pairwise_distances_argmin
 import matplotlib.pyplot as plt
 
-# Helper to align centroids and labels
+# order the centroids for better comparison
 def align_centroids(reference_centers, centers):
     order = pairwise_distances_argmin(reference_centers, centers)
     return centers[order], order
